@@ -1,14 +1,19 @@
 #include "TGAImage.h"
 #include <iostream>
 #include <sys/stat.h>
-#include <direct.h>
 
 void createOutputDirectory() {
-    #ifdef _WIN32
-    _mkdir("output");
-    #else
-    mkdir("output", 0777);
-    #endif
+    struct stat st = {0};
+    if (stat("output", &st) == -1) {
+        #ifdef _WIN32
+        if (mkdir("output") != 0)
+        #else
+        if (mkdir("output", 0777) != 0)
+        #endif
+        {
+            throw std::runtime_error("Failed to create output directory");
+        }
+    }
 }
 
 void task1() {
