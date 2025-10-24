@@ -35,19 +35,16 @@ void TGAImage::load(const std::string& filename) {
         file.seekg(mapSize, std::ios::cur);
     }
 
-    // Read pixel data
-    int size = header.width * header.height * (header.bitsPerPixel / 8);
+    // Always read as 24-bit RGB
+    int size = header.width * header.height * 3;
     pixelData.resize(size);
     file.read(reinterpret_cast<char*>(pixelData.data()), size);
     if (!file) {
         throw std::runtime_error("Error reading pixel data from file: " + filename);
     }
-
-    // If not RGB format, convert to RGB
-    if (header.bitsPerPixel != 24) {
-        
-        throw std::runtime_error("Unsupported bits per pixel: " + std::to_string(header.bitsPerPixel));
-    }
+    
+    // Force header to be 24-bit RGB
+    header.bitsPerPixel = 24;
 }
 
 void TGAImage::save(const std::string& filename) {
