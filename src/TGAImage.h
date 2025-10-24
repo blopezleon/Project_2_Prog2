@@ -23,9 +23,9 @@ class TGAImage {
 private:
     TGAHeader header;
     std::vector<unsigned char> pixelData;
-    unsigned char clamp(int value);
-    float normalize(unsigned char value);
-    unsigned char denormalize(float value);
+    static unsigned char clamp(int value);
+    static float normalize(unsigned char value);
+    static unsigned char denormalize(float value);
 
 public:
     TGAImage() = default;

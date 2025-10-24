@@ -189,7 +189,6 @@ void TGAImage::multiplyChannel(char channel, float factor) {
 
 TGAImage TGAImage::extractChannel(char channel) const {
     TGAImage result = *this;
-    int offset = (channel == 'R') ? 2 : (channel == 'G' ? 1 : 0);
     
     for (int y = 0; y < header.height; y++) {
         for (int x = 0; x < header.width; x++) {
