@@ -6,18 +6,18 @@
 #include <cstring>
 
 struct TGAHeader {
-    char idLength;
-    char colorMapType;
-    char dataTypeCode;
+    unsigned char idLength;
+    unsigned char colorMapType;
+    unsigned char dataTypeCode;
     short colorMapOrigin;
     short colorMapLength;
-    char colorMapDepth;
+    unsigned char colorMapDepth;
     short xOrigin;
     short yOrigin;
     short width;
     short height;
-    char bitsPerPixel;
-    char imageDescriptor;
+    unsigned char bitsPerPixel;
+    unsigned char imageDescriptor;
 };
 
 class TGAImage {
