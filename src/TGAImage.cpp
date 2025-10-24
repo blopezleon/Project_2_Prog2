@@ -11,23 +11,35 @@ void TGAImage::load(const std::string& filename) {
         throw std::runtime_error("Cannot open file: " + filename);
     }
 
-
+    // Read header
     file.read(reinterpret_cast<char*>(&header), sizeof(TGAHeader));
     if (!file) {
         throw std::runtime_error("Error reading header from file: " + filename);
     }
 
-
-    if (header.dataTypeCode != 2 || header.bitsPerPixel != 24) {
-        throw std::runtime_error("Invalid TGA format - must be 24-bit uncompressed RGB");
+    // Skip image ID field
+    if (header.idLength > 0) {
+        file.seekg(header.idLength, std::ios::cur);
     }
 
+    // Skip color map if present
+    if (header.colorMapType > 0) {
+        int mapSize = header.colorMapLength * (header.colorMapDepth + 7) / 8;
+        file.seekg(mapSize, std::ios::cur);
+    }
 
-    int size = header.width * header.height * 3;
+    // Read pixel data
+    int size = header.width * header.height * (header.bitsPerPixel / 8);
     pixelData.resize(size);
     file.read(reinterpret_cast<char*>(pixelData.data()), size);
     if (!file) {
         throw std::runtime_error("Error reading pixel data from file: " + filename);
+    }
+
+    // If not RGB format, convert to RGB
+    if (header.bitsPerPixel != 24) {
+        
+        throw std::runtime_error("Unsupported bits per pixel: " + std::to_string(header.bitsPerPixel));
     }
 }
 
@@ -59,22 +71,30 @@ unsigned char TGAImage::denormalize(float value) {
 }
 
 unsigned char TGAImage::getBlue(int x, int y) const {
-    int index = (y * header.width + x) * 3;
+
+    int flipped_y = header.height - 1 - y;
+    int index = (flipped_y * header.width + x) * 3;
     return pixelData[index];
 }
 
 unsigned char TGAImage::getGreen(int x, int y) const {
-    int index = (y * header.width + x) * 3;
+
+    int flipped_y = header.height - 1 - y;
+    int index = (flipped_y * header.width + x) * 3;
     return pixelData[index + 1];
 }
 
 unsigned char TGAImage::getRed(int x, int y) const {
-    int index = (y * header.width + x) * 3;
+ 
+    int flipped_y = header.height - 1 - y;
+    int index = (flipped_y * header.width + x) * 3;
     return pixelData[index + 2];
 }
 
 void TGAImage::setPixel(int x, int y, unsigned char r, unsigned char g, unsigned char b) {
-    int index = (y * header.width + x) * 3;
+
+    int flipped_y = header.height - 1 - y;
+    int index = (flipped_y * header.width + x) * 3;
     pixelData[index] = b;     
     pixelData[index + 1] = g; 
     pixelData[index + 2] = r; 
