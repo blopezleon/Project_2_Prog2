@@ -13,11 +13,22 @@ void TGAImage::load(const std::string& filename) {
 
 
     file.read(reinterpret_cast<char*>(&header), sizeof(TGAHeader));
-    
+    if (!file) {
+        throw std::runtime_error("Error reading header from file: " + filename);
+    }
 
-    int size = header.width * header.height * 3; 
+
+    if (header.dataTypeCode != 2 || header.bitsPerPixel != 24) {
+        throw std::runtime_error("Invalid TGA format - must be 24-bit uncompressed RGB");
+    }
+
+
+    int size = header.width * header.height * 3;
     pixelData.resize(size);
     file.read(reinterpret_cast<char*>(pixelData.data()), size);
+    if (!file) {
+        throw std::runtime_error("Error reading pixel data from file: " + filename);
+    }
 }
 
 void TGAImage::save(const std::string& filename) {

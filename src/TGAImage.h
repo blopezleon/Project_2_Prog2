@@ -3,6 +3,7 @@
 #include <vector>
 #include <fstream>
 #include <stdexcept>
+#include <cstring>
 
 struct TGAHeader {
     char idLength;
@@ -28,8 +29,10 @@ private:
     static unsigned char denormalize(float value);
 
 public:
-    TGAImage() = default;
-    TGAImage(const std::string& filename);
+    TGAImage() {
+        header = {0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 24, 0}; // Initialize with default values
+    }
+    explicit TGAImage(const std::string& filename);
     
 
     void load(const std::string& filename);
