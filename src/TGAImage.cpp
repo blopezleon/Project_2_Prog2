@@ -13,11 +13,32 @@ void TGAImage::load(const std::string& filename) {
         throw std::runtime_error("Cannot open file: " + filename);
     }
 
-    // Read header exactly as it is in the file
-    file.read(reinterpret_cast<char*>(&header), sizeof(TGAHeader));
+    // Read header bytes
+    unsigned char header_data[18];
+    file.read(reinterpret_cast<char*>(header_data), sizeof(header_data));
     if (!file) {
         throw std::runtime_error("Error reading header from file: " + filename);
     }
+
+    // Clear header struct
+    memset(&header, 0, sizeof(TGAHeader));
+
+    // Parse header fields
+    header.idLength = header_data[0];
+    header.colorMapType = header_data[1];
+    header.dataTypeCode = header_data[2];
+    header.colorMapOrigin = *reinterpret_cast<short*>(&header_data[3]);
+    header.colorMapLength = *reinterpret_cast<short*>(&header_data[5]);
+    header.colorMapDepth = header_data[7];
+    header.xOrigin = *reinterpret_cast<short*>(&header_data[8]);
+    header.yOrigin = *reinterpret_cast<short*>(&header_data[10]);
+    
+    // Read width/height in little-endian order
+    header.width = header_data[12] | (header_data[13] << 8);
+    header.height = header_data[14] | (header_data[15] << 8);
+    
+    header.bitsPerPixel = header_data[16];
+    header.imageDescriptor = header_data[17];
 
     // Skip image ID field
     if (header.idLength > 0) {
@@ -45,16 +66,23 @@ void TGAImage::save(const std::string& filename) {
         throw std::runtime_error("Cannot create file: " + filename);
     }
 
-    // Set minimal header fields while preserving dimensions
-    TGAHeader saveHeader = {0}; // Zero initialize
-    saveHeader.dataTypeCode = 2;  // Uncompressed RGB
-    saveHeader.width = header.width;
-    saveHeader.height = header.height;
-    saveHeader.bitsPerPixel = 24;
-    saveHeader.imageDescriptor = 0;  // bottom-left origin
+    // Write header fields individually to ensure correct byte order
+    unsigned char header_data[18] = {0};
+    header_data[2] = 2;  // dataTypeCode = 2 (uncompressed RGB)
+    
+    // Write width in little-endian order
+    header_data[12] = header.width & 0xFF;        // Low byte
+    header_data[13] = (header.width >> 8) & 0xFF; // High byte
+    
+    // Write height in little-endian order
+    header_data[14] = header.height & 0xFF;        // Low byte
+    header_data[15] = (header.height >> 8) & 0xFF; // High byte
+    
+    header_data[16] = 24;  // bitsPerPixel = 24
+    header_data[17] = 0;   // imageDescriptor = 0 (bottom-left origin)
 
     // Write header
-    file.write(reinterpret_cast<char*>(&saveHeader), sizeof(TGAHeader));
+    file.write(reinterpret_cast<char*>(header_data), sizeof(header_data));
     
     // Write pixel data
     file.write(reinterpret_cast<char*>(pixelData.data()), pixelData.size());
