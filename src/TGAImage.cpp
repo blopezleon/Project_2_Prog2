@@ -181,10 +181,11 @@ TGAImage TGAImage::subtract(const TGAImage& top, const TGAImage& bottom) {
     
     for (int y = 0; y < result.getHeight(); y++) {
         for (int x = 0; x < result.getWidth(); x++) {
+            // Subtract from top instead of bottom
             result.setPixel(x, y,
-                clamp(static_cast<int>(bottom.getRed(x, y)) - static_cast<int>(top.getRed(x, y))),
-                clamp(static_cast<int>(bottom.getGreen(x, y)) - static_cast<int>(top.getGreen(x, y))),
-                clamp(static_cast<int>(bottom.getBlue(x, y)) - static_cast<int>(top.getBlue(x, y))));
+                clamp(static_cast<int>(top.getRed(x, y)) - static_cast<int>(bottom.getRed(x, y))),
+                clamp(static_cast<int>(top.getGreen(x, y)) - static_cast<int>(bottom.getGreen(x, y))),
+                clamp(static_cast<int>(top.getBlue(x, y)) - static_cast<int>(bottom.getBlue(x, y))));
         }
     }
     return result;
@@ -272,8 +273,12 @@ void TGAImage::setChannel(char channel, const TGAImage& source) {
     
     for (int y = 0; y < header.height; y++) {
         for (int x = 0; x < header.width; x++) {
-            int index = (y * header.width + x) * 3 + offset;
-            pixelData[index] = source.getRed(x, y); 
+            // Get the average of RGB from source as the intensity
+            unsigned char intensity = source.getRed(x, y);
+            
+            int flipped_y = header.height - 1 - y;
+            int index = (flipped_y * header.width + x) * 3 + offset;
+            pixelData[index] = intensity;
         }
     }
 }
