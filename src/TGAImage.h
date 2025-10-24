@@ -31,9 +31,6 @@ private:
 public:
     TGAImage() {
         memset(&header, 0, sizeof(TGAHeader));
-        header.dataTypeCode = 2;     // Uncompressed RGB
-        header.bitsPerPixel = 24;    // 24-bit RGB
-        header.imageDescriptor = 32;  // Upper-left origin, 8 bits alpha
     }
     explicit TGAImage(const std::string& filename);
     TGAImage(const TGAImage& other) : header(other.header), pixelData(other.pixelData) {}

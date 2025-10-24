@@ -2,11 +2,8 @@
 #include <cmath>
 
 TGAImage::TGAImage(const std::string& filename) {
-    // Initialize header with defaults first
+    // Initialize header with zeros
     memset(&header, 0, sizeof(TGAHeader));
-    header.dataTypeCode = 2;     // Uncompressed RGB
-    header.bitsPerPixel = 24;    // 24-bit color
-    header.imageDescriptor = 32;  // Non-interleaved, bottom-left origin
     load(filename);
 }
 
@@ -16,13 +13,11 @@ void TGAImage::load(const std::string& filename) {
         throw std::runtime_error("Cannot open file: " + filename);
     }
 
-    // Read header into a temporary structure first
-    TGAHeader tempHeader;
-    file.read(reinterpret_cast<char*>(&tempHeader), sizeof(TGAHeader));
+    // Read header exactly as it is in the file
+    file.read(reinterpret_cast<char*>(&header), sizeof(TGAHeader));
     if (!file) {
         throw std::runtime_error("Error reading header from file: " + filename);
     }
-    header = tempHeader;
 
     // Skip image ID field
     if (header.idLength > 0) {
@@ -35,16 +30,13 @@ void TGAImage::load(const std::string& filename) {
         file.seekg(mapSize, std::ios::cur);
     }
 
-    // Always read as 24-bit RGB
+    // Read pixel data
     int size = header.width * header.height * 3;
     pixelData.resize(size);
     file.read(reinterpret_cast<char*>(pixelData.data()), size);
     if (!file) {
         throw std::runtime_error("Error reading pixel data from file: " + filename);
     }
-    
-    // Force header to be 24-bit RGB
-    header.bitsPerPixel = 24;
 }
 
 void TGAImage::save(const std::string& filename) {
