@@ -1,11 +1,14 @@
 #include "TGAImage.h"
 #include <iostream>
-#include <filesystem>
-
-namespace fs = std::filesystem;
+#include <sys/stat.h>
+#include <direct.h>
 
 void createOutputDirectory() {
-    fs::create_directories("output");
+    #ifdef _WIN32
+    _mkdir("output");
+    #else
+    mkdir("output", 0777);
+    #endif
 }
 
 void task1() {

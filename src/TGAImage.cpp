@@ -172,17 +172,17 @@ TGAImage TGAImage::overlay(const TGAImage& top, const TGAImage& bottom) {
 }
 
 void TGAImage::addToChannel(char channel, unsigned char value) {
-    int offset = (channel == 'R') ? 2 : (channel == 'G' ? 1 : 0);
+    size_t offset = (channel == 'R') ? 2 : (channel == 'G' ? 1 : 0);
     
-    for (int i = offset; i < pixelData.size(); i += 3) {
+    for (size_t i = offset; i < pixelData.size(); i += 3) {
         pixelData[i] = clamp(static_cast<int>(pixelData[i]) + value);
     }
 }
 
 void TGAImage::multiplyChannel(char channel, float factor) {
-    int offset = (channel == 'R') ? 2 : (channel == 'G' ? 1 : 0);
+    size_t offset = (channel == 'R') ? 2 : (channel == 'G' ? 1 : 0);
     
-    for (int i = offset; i < pixelData.size(); i += 3) {
+    for (size_t i = offset; i < pixelData.size(); i += 3) {
         pixelData[i] = clamp(static_cast<int>(pixelData[i] * factor));
     }
 }
