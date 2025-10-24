@@ -45,17 +45,23 @@ void TGAImage::save(const std::string& filename) {
         throw std::runtime_error("Cannot create file: " + filename);
     }
 
-    // Ensure header has correct values
+    values are correct
+    short savedWidth = header.width;
+    short savedHeight = header.height;
+
+    // Set header fields
     header.idLength = 0;
     header.colorMapType = 0;
-    header.dataTypeCode = 2;  // Uncompressed RGB
+    header.dataTypeCode = 2; 
     header.colorMapOrigin = 0;
     header.colorMapLength = 0;
     header.colorMapDepth = 0;
     header.xOrigin = 0;
     header.yOrigin = 0;
+    header.width = savedWidth;   
+    header.height = savedHeight; 
     header.bitsPerPixel = 24;
-    header.imageDescriptor = 0;  // bottom-left origin
+    header.imageDescriptor = 0;  
 
     // Write header
     file.write(reinterpret_cast<char*>(&header), sizeof(TGAHeader));
